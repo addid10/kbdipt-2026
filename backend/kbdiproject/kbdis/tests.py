@@ -1,6 +1,7 @@
+from datetime import timedelta
+
 from django.test import SimpleTestCase, TestCase
 from django.utils import timezone
-from datetime import timedelta
 
 from peatlandcovers.models import PeatlandSite
 
@@ -47,7 +48,7 @@ class PreviousKBDIResolutionTests(TestCase):
         self.time_one = timezone.now() - timedelta(hours=24)
         self.time_two = timezone.now()
 
-    def test_first_reading_requires_initial_kbdi(self):
+    def test_first_reading_does_not_require_previous_kbdi(self):
         serializer = KBDIReadingCreateSerializer(
             data={
                 "site": self.site.id,
@@ -57,8 +58,9 @@ class PreviousKBDIResolutionTests(TestCase):
                 "max_temperature_c": 30,
             }
         )
-        self.assertFalse(serializer.is_valid())
-        self.assertIn("initial_kbdi", serializer.errors)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        first = serializer.save()
+        self.assertEqual(first.previous_kbdi, 0.0)
 
     def test_second_reading_uses_previous_kbdi_automatically(self):
         first = create_kbdi_reading(
@@ -67,7 +69,6 @@ class PreviousKBDIResolutionTests(TestCase):
             rainfall_today_mm=0,
             rainfall_yesterday_mm=0,
             max_temperature_c=30,
-            initial_kbdi=250,
         )
         second = create_kbdi_reading(
             site=self.site,
@@ -75,25 +76,6 @@ class PreviousKBDIResolutionTests(TestCase):
             rainfall_today_mm=0,
             rainfall_yesterday_mm=0,
             max_temperature_c=30,
-        )
-        self.assertAlmostEqual(second.previous_kbdi, first.kbdi, places=6)
-
-    def test_initial_value_cannot_override_existing_previous_reading(self):
-        first = create_kbdi_reading(
-            site=self.site,
-            observed_at=self.time_one,
-            rainfall_today_mm=0,
-            rainfall_yesterday_mm=0,
-            max_temperature_c=30,
-            initial_kbdi=220,
-        )
-        second = create_kbdi_reading(
-            site=self.site,
-            observed_at=self.time_two,
-            rainfall_today_mm=0,
-            rainfall_yesterday_mm=0,
-            max_temperature_c=30,
-            initial_kbdi=399,
         )
         self.assertAlmostEqual(second.previous_kbdi, first.kbdi, places=6)
 
@@ -106,6 +88,22 @@ class AlertLifecycleTests(TestCase):
         )
         self.base_time = timezone.now() - timedelta(hours=48)
 
+        # Seed a historical result so the service can exercise High/Extreme
+        # alert transitions while keeping normal first-reading behavior at 0.
+        self.seed = KBDIReading.objects.create(
+            site=self.site,
+            observed_at=self.base_time - timedelta(hours=24),
+            rainfall_today_mm=0,
+            rainfall_yesterday_mm=0,
+            max_temperature_c=30,
+            previous_kbdi=0,
+            rain_event_accumulation_mm=0,
+            effective_rainfall_mm=0,
+            drought_factor=0,
+            kbdi=320,
+            level=KBDIReading.Level.HIGH,
+        )
+
     def test_high_extreme_and_clear_lifecycle(self):
         high = create_kbdi_reading(
             site=self.site,
@@ -113,7 +111,6 @@ class AlertLifecycleTests(TestCase):
             rainfall_today_mm=0,
             rainfall_yesterday_mm=0,
             max_temperature_c=30,
-            initial_kbdi=320,
         )
         self.assertEqual(high.level, KBDIReading.Level.HIGH)
         self.assertTrue(high.alarm_active)

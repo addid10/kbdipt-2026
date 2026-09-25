@@ -21,7 +21,6 @@ def index(request):
                 rainfall_yesterday_mm=form.cleaned_data["rainfall_yesterday_mm"],
                 max_temperature_c=form.cleaned_data["max_temperature_c"],
                 water_table_depth_mm=form.cleaned_data.get("water_table_depth_mm"),
-                initial_kbdi=form.cleaned_data.get("initial_kbdi"),
                 created_by=request.user,
             )
             messages.success(request, "Perhitungan KBDIpt berhasil disimpan.")
@@ -32,7 +31,6 @@ def index(request):
         "navbar": "kbdi",
         "form": form,
         "readings": KBDIReading.objects.select_related("site")[:30],
-        "sites_with_readings": list(KBDIReading.objects.values_list("site_id", flat=True).distinct()),
         "active_alerts": AlertEvent.objects.select_related("site", "reading").filter(
             status=AlertEvent.Status.ACTIVE
         ),

@@ -51,28 +51,9 @@ class KBDIReadingCreateSerializer(serializers.Serializer):
     rainfall_yesterday_mm = serializers.FloatField(min_value=0, default=0)
     max_temperature_c = serializers.FloatField()
     water_table_depth_mm = serializers.FloatField(required=False, allow_null=True, min_value=0)
-    initial_kbdi = serializers.FloatField(required=False, min_value=0, max_value=400)
 
     def validate(self, attrs):
-        site = attrs.get("site")
-        observed_at = attrs.get("observed_at") or timezone.now()
-        attrs["observed_at"] = observed_at
-
-        has_previous_reading = site.kbdi_readings.filter(observed_at__lt=observed_at).exists()
-        if not has_previous_reading and attrs.get("initial_kbdi") is None:
-            raise serializers.ValidationError(
-                {
-                    "initial_kbdi": (
-                        "This is the first KBDIpt reading for the site. "
-                        "Provide the initial KBDIpt value."
-                    )
-                }
-            )
-
-        # initial_kbdi is only a seed for the first chronological reading.
-        # It can never override an existing previous KBDIpt value.
-        if has_previous_reading:
-            attrs.pop("initial_kbdi", None)
+        attrs["observed_at"] = attrs.get("observed_at") or timezone.now()
         return attrs
 
     def create(self, validated_data):
@@ -84,7 +65,6 @@ class KBDIReadingCreateSerializer(serializers.Serializer):
             rainfall_yesterday_mm=validated_data.get("rainfall_yesterday_mm", 0),
             max_temperature_c=validated_data["max_temperature_c"],
             water_table_depth_mm=validated_data.get("water_table_depth_mm"),
-            initial_kbdi=validated_data.get("initial_kbdi"),
             created_by=request.user if request and request.user.is_authenticated else None,
         )
 

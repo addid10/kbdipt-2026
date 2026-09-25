@@ -4,20 +4,17 @@
     <section class="panel">
         <div class="panel-heading"><div><span class="eyebrow">Perhitungan</span><h2>Input KBDIpt</h2></div></div>
         <p class="muted">Threshold lahan gambut: Low ≤200, Moderat &gt;200–300, High &gt;300–350, Extreme &gt;350. Alarm aktif pada High dan Extreme.</p>
-        <p class="muted"><strong>KBDIpt sebelumnya diambil otomatis</strong> dari pengukuran terakhir pada lokasi yang sama. Nilai awal hanya diperlukan saat lokasi belum memiliki pengukuran sebelumnya.</p>
+        <p class="muted"><strong>KBDIpt sebelumnya diambil otomatis.</strong> Untuk pengukuran pertama pada sebuah lokasi, sistem menggunakan KBDIpt sebelumnya = 0. Pengukuran berikutnya menggunakan hasil KBDIpt terakhir pada lokasi yang sama.</p>
         <form method="post" class="form-grid" id="kbdi-reading-form">
             {% csrf_token %}
             {% for field in form %}
-                <label
-                    class="{% if field.name == 'site' or field.name == 'observed_at' %}full{% endif %}{% if field.name == 'initial_kbdi' %} full initial-kbdi-field{% endif %}"
-                    {% if field.name == 'initial_kbdi' %}data-initial-kbdi-field{% endif %}
-                >
+                <label class="{% if field.name == 'site' or field.name == 'observed_at' %}full{% endif %}">
                     {{ field.label }} {{ field }}
                     {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
                     {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
                 </label>
             {% endfor %}
-            <div class="full"><button class="primary-button" type="submit">Hitung & Simpan</button></div>
+            <div class="full"><button class="primary-button" type="submit">Hitung &amp; Simpan</button></div>
         </form>
     </section>
 
@@ -37,28 +34,4 @@
         {% empty %}<tr><td colspan="10" class="empty">Belum ada pengukuran.</td></tr>{% endfor %}
     </tbody></table></div>
 </section>
-
-{{ sites_with_readings|json_script:"sites-with-readings" }}
-<script>
-(function () {
-    const siteSelect = document.getElementById('id_site');
-    const initialField = document.querySelector('[data-initial-kbdi-field]');
-    const initialInput = document.getElementById('id_initial_kbdi');
-    const dataNode = document.getElementById('sites-with-readings');
-    if (!siteSelect || !initialField || !initialInput || !dataNode) return;
-
-    const sitesWithReadings = new Set(JSON.parse(dataNode.textContent).map(String));
-
-    function syncInitialField() {
-        const selectedSite = String(siteSelect.value || '');
-        const needsInitial = Boolean(selectedSite) && !sitesWithReadings.has(selectedSite);
-        initialField.hidden = !needsInitial;
-        initialInput.required = needsInitial;
-        if (!needsInitial) initialInput.value = '';
-    }
-
-    siteSelect.addEventListener('change', syncInitialField);
-    syncInitialField();
-})();
-</script>
 {% endblock %}

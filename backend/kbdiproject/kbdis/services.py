@@ -193,7 +193,6 @@ def create_kbdi_reading(
     rainfall_yesterday_mm,
     max_temperature_c,
     water_table_depth_mm=None,
-    initial_kbdi=None,
     created_by=None,
 ):
     previous_reading, previous_event_accumulation = _resolve_previous_event_accumulation(
@@ -201,15 +200,11 @@ def create_kbdi_reading(
         observed_at,
         rainfall_yesterday_mm,
     )
-    if previous_reading is not None:
-        previous_kbdi = float(previous_reading.kbdi)
-    else:
-        if initial_kbdi in (None, ""):
-            raise ValueError(
-                "initial_kbdi is required for the first chronological KBDIpt reading of a site."
-            )
-        previous_kbdi = float(initial_kbdi)
-
+    # The first chronological reading starts from KBDIpt = 0.
+    # Every later reading automatically uses the latest earlier reading
+    # from the same site as KBDI(t-1). Operators and API clients do not
+    # provide a previous/initial KBDIpt value.
+    previous_kbdi = float(previous_reading.kbdi) if previous_reading is not None else 0.0
 
     result = calculate_kbdi(
         previous_kbdi=previous_kbdi,
