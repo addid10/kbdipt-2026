@@ -1,43 +1,45 @@
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: kbdipt
-      POSTGRES_USER: kbdipt
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kbdipt -d kbdipt"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
+
+    environment:
+      DJANGO_DEBUG: '${DJANGO_DEBUG:-false}'
+      DJANGO_SECRET_KEY: '${DJANGO_SECRET_KEY}'
+      DJANGO_ALLOWED_HOSTS: '${DJANGO_ALLOWED_HOSTS}'
+      DJANGO_CSRF_TRUSTED_ORIGINS: '${DJANGO_CSRF_TRUSTED_ORIGINS}'
+
+      DATABASE_URL: '${DATABASE_URL}'
+
+      VEGETATION_MODEL_PATH: /app/backend/kbdiproject/model_weights/vegetation_shufflenet_v2_epoch75.pkl
+
+      DJANGO_SECURE_SSL_REDIRECT: '${DJANGO_SECURE_SSL_REDIRECT:-true}'
+      DJANGO_SESSION_COOKIE_SECURE: '${DJANGO_SESSION_COOKIE_SECURE:-true}'
+      DJANGO_CSRF_COOKIE_SECURE: '${DJANGO_CSRF_COOKIE_SECURE:-true}'
+      DJANGO_SECURE_HSTS_SECONDS: '${DJANGO_SECURE_HSTS_SECONDS:-0}'
+
     expose:
-      - "8000"
+      - '8000'
+
     volumes:
-      - media_data:/app/backend/kbdiproject/media
+      - 'media_data:/app/backend/kbdiproject/media'
 
   nginx:
-    image: nginx:1.27-alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.coolify
     restart: unless-stopped
+
     depends_on:
       - web
-    ports:
-      - "80:80"
+
+    expose:
+      - '80'
+
     volumes:
-      - ./nginx/kbdipt.conf:/etc/nginx/conf.d/default.conf:ro
-      - media_data:/media:ro
+      - 'media_data:/media:ro'
 
 volumes:
-  postgres_data:
   media_data:
