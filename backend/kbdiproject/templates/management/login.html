@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'css/management.css' %}">
+</head>
+<body class="login-body">
+    <main class="login-card">
+        <div class="brand-mark large">K</div>
+        <p class="eyebrow">KBDIpt</p>
+        <h1>Login Operator</h1>
+        <p class="muted">Masuk untuk mengelola lahan, prediksi vegetasi, KBDIpt, dan peringatan EWS.</p>
+        {% if messages %}{% for message in messages %}<div class="message error">{{ message }}</div>{% endfor %}{% endif %}
+        <form method="post" class="stack-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+            <label>Username {{ form.username }}</label>
+            <label>Password {{ form.password }}</label>
+            <button class="primary-button" type="submit">Masuk</button>
+        </form>
+        <a class="back-link" href="{% url 'public.home' %}">← Kembali ke halaman publik</a>
+    </main>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{% extends 'management/base.html' %}
+{% block content %}
+<div class="two-column">
+    <section class="panel">
+        <div class="panel-heading"><div><span class="eyebrow">ShuffleNetV2</span><h2>Prediksi Kerapatan Vegetasi</h2></div></div>
+        <p class="muted">Unggah satu citra JPG/PNG. Model dijalankan pada server dan hasil disimpan sebagai histori.</p>
+        <form method="post" enctype="multipart/form-data" class="stack-form">
+            {% csrf_token %}<input type="hidden" name="action" value="predict">
+            {% for field in prediction_form %}
+                <label>{{ field.label }} {{ field }}{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</label>
+            {% endfor %}
+            <button class="primary-button" type="submit">Proses Prediksi</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <div class="panel-heading"><div><span class="eyebrow">Lokasi</span><h2>Tambah Lahan</h2></div></div>
+        <form method="post" enctype="multipart/form-data" class="stack-form compact">
+            {% csrf_token %}<input type="hidden" name="action" value="create_site">
+            {% for field in site_form %}
+                <label>{{ field.label }} {{ field }}{% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}</label>
+            {% endfor %}
+            <button class="secondary-button" type="submit">Simpan Lahan</button>
+        </form>
+    </section>
+</div>
+
+<section class="panel">
+    <div class="panel-heading"><div><span class="eyebrow">Histori</span><h2>Prediksi Terbaru</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Citra</th><th>Lokasi</th><th>Kelas</th><th>Confidence</th><th>Model</th><th>Waktu</th></tr></thead><tbody>
+        {% for prediction in latest_predictions %}<tr><td><img class="table-thumb" src="{{ prediction.image.url }}" alt=""></td><td>{{ prediction.site.name }}</td><td>{{ prediction.get_vegetation_class_display }}</td><td>{{ prediction.confidence|floatformat:3 }}</td><td>{{ prediction.model_version }}</td><td>{{ prediction.predicted_at|date:"d M Y H:i" }}</td></tr>
+        {% empty %}<tr><td colspan="6" class="empty">Belum ada prediksi.</td></tr>{% endfor %}
+    </tbody></table></div>
+</section>
+{% endblock %}

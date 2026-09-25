@@ -1,0 +1,28 @@
+<header class="public-header">
+    <div class="public-header-top">
+        <a href="{% url 'public.home' %}" class="public-brand" aria-label="Kembali ke beranda">
+            <span class="tree-logo" aria-hidden="true">
+                <svg viewBox="0 0 48 48"><path d="M24 5c-5 0-9 4-9 9-5 0-9 4-9 9 0 5 4 9 9 9h5v10h8V32h5c5 0 9-4 9-9s-4-9-9-9c0-5-4-9-9-9z" fill="currentColor"/><path d="M24 18v16M17 24l7 5 7-5" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span><strong>Monitoring Kekeringan</strong><small>Sistem Peringatan Dini Kebakaran Lahan Gambut</small></span>
+        </a>
+        <div class="header-actions">
+            <span class="icon-button passive" title="Status koneksi" aria-label="Status koneksi">
+                <svg viewBox="0 0 24 24"><path d="M2.8 8.7a14.5 14.5 0 0 1 18.4 0M5.8 12a10 10 0 0 1 12.4 0m-9.2 3.3a5.1 5.1 0 0 1 6 0M12 19h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </span>
+            <a class="icon-button" href="{% url 'public.alerts' %}" aria-label="Peringatan">
+                <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                {% if active_alerts %}<span class="notification-dot"></span>{% endif %}
+            </a>
+            <a class="icon-button user-shortcut" href="{% url 'user.profile' %}" aria-label="Profil pengguna">
+                <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </a>
+        </div>
+    </div>
+    {% if selected_site %}
+    <div class="header-context">
+        <div class="location-line"><span>⌖</span><strong>{{ selected_site.location }}</strong></div>
+        {% if selected_site.current_reading %}<span class="status-badge {{ selected_site.current_reading.level }}">Status: {{ selected_site.current_reading.get_level_display }}</span>{% else %}<span class="status-badge neutral">Belum ada data</span>{% endif %}
+    </div>
+    {% endif %}
+</header>

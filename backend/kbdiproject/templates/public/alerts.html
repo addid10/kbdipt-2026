@@ -1,0 +1,23 @@
+{% extends 'public/base.html' %}
+{% block content %}
+<header class="simple-page-header"><span>KBDIpt</span><h1>Peringatan</h1><p>Status High dan Extreme yang mengaktifkan alarm EWS.</p></header>
+<section class="content-card">
+    <div class="section-heading"><h2>Aktif</h2><span>{{ active_alerts|length }} peringatan</span></div>
+    <div class="public-alert-list">
+        {% for alert in active_alerts %}
+        <a href="{% url 'public.site_detail' alert.site.code %}" class="public-alert-item {{ alert.severity }}">
+            <span class="public-alert-symbol">{% if alert.severity == 'extreme' %}×{% else %}⚠{% endif %}</span>
+            <div><strong>{{ alert.get_severity_display }} · {{ alert.site.name }}</strong><p>{{ alert.message }}</p><small>{{ alert.triggered_at|date:"d M Y H:i" }} WITA</small></div>
+            <b>{{ alert.reading.kbdi|floatformat:1 }}</b>
+        </a>
+        {% empty %}<div class="quiet-state"><span>✓</span><strong>Tidak ada alarm aktif</strong><p>Belum ada lokasi dengan status High atau Extreme.</p></div>{% endfor %}
+    </div>
+</section>
+<section class="content-card">
+    <div class="section-heading"><h2>Riwayat Peringatan</h2><span>50 terakhir</span></div>
+    <div class="history-list">
+        {% for alert in alert_history %}<article><span class="history-dot {{ alert.severity }}"></span><div><strong>{{ alert.site.name }} · {{ alert.get_severity_display }}</strong><small>{{ alert.triggered_at|date:"d M Y H:i" }}{% if alert.cleared_at %} – {{ alert.cleared_at|date:"d M H:i" }}{% endif %}</small></div><b>{{ alert.reading.kbdi|floatformat:1 }}</b></article>
+        {% empty %}<p class="empty-copy">Belum ada riwayat peringatan.</p>{% endfor %}
+    </div>
+</section>
+{% endblock %}

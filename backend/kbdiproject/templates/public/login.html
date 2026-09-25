@@ -1,0 +1,43 @@
+{% extends 'public/auth_base.html' %}
+{% block content %}
+<section class="auth-brand-panel">
+    <div class="auth-brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M24 5c-5 0-9 4-9 9-5 0-9 4-9 9 0 5 4 9 9 9h5v10h8V32h5c5 0 9-4 9-9s-4-9-9-9c0-5-4-9-9-9z" fill="currentColor"/><path d="M24 18v16M17 24l7 5 7-5" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <span class="auth-eyebrow">KBDIpt</span>
+    <h1>Monitoring Kekeringan</h1>
+    <p>Sistem Peringatan Dini Kebakaran Lahan Gambut</p>
+</section>
+
+<section class="auth-card">
+    <div class="auth-heading">
+        <span>Selamat datang</span>
+        <h2>Masuk ke akun Anda</h2>
+        <p>Lihat status KBDIpt, peringatan aktif, dan riwayat monitoring lokasi.</p>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="auth-alert error">{% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
+    {% endif %}
+
+    <form method="post" class="auth-form" novalidate>
+        {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <label>
+            <span>Username</span>
+            {{ form.username }}
+            {% for error in form.username.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </label>
+        <label>
+            <span>Password</span>
+            {{ form.password }}
+            {% for error in form.password.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </label>
+        <button type="submit" class="auth-primary-button">Masuk</button>
+    </form>
+
+    <p class="auth-switch">Belum punya akun? <a href="{% url 'user.register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Daftar sekarang</a></p>
+</section>
+
+<p class="auth-footnote">Akses monitoring hanya tersedia bagi pengguna yang telah terdaftar.</p>
+{% endblock %}

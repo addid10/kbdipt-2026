@@ -1,0 +1,43 @@
+{% extends 'public/base.html' %}
+{% block content %}
+<header class="simple-page-header profile-page-header">
+    <span>KBDIpt</span>
+    <h1>Profil</h1>
+    <p>Informasi akun dan akses pengguna.</p>
+</header>
+
+
+<section class="content-card profile-card">
+    <div class="profile-avatar">{{ request.user.first_name|default:request.user.username|slice:":1"|upper }}</div>
+    <div class="profile-identity">
+        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+        <span>@{{ request.user.username }}</span>
+        <small>{{ request.user.email|default:"Email belum tersedia" }}</small>
+    </div>
+</section>
+
+<section class="content-card account-summary">
+    <a href="{% url 'public.alerts' %}" class="profile-menu-row">
+        <span class="profile-menu-icon">!</span>
+        <div><strong>Peringatan Aktif</strong><small>Lihat kondisi High dan Extreme saat ini</small></div>
+        <b>{{ active_alert_count }}</b>
+    </a>
+    <a href="{% url 'public.info' %}" class="profile-menu-row">
+        <span class="profile-menu-icon">i</span>
+        <div><strong>Tentang KBDIpt</strong><small>Threshold, status, dan cara membaca sistem</small></div>
+        <b>›</b>
+    </a>
+</section>
+
+<section class="content-card profile-meta-card">
+    <div><span>Terdaftar sejak</span><strong>{{ request.user.date_joined|date:"d M Y" }}</strong></div>
+    <div><span>Status akun</span><strong class="account-active">Aktif</strong></div>
+</section>
+
+<section class="content-card logout-card">
+    <form method="post" action="{% url 'user.logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="logout-button">Keluar dari Akun</button>
+    </form>
+</section>
+{% endblock %}

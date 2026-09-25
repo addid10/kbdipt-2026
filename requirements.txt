@@ -1,0 +1,10 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+Django==5.2.6
+djangorestframework==3.16.1
+dj-database-url==3.0.1
+psycopg[binary]==3.2.9
+Pillow==11.3.0
+whitenoise==6.9.0
+gunicorn==23.0.0
+torch==2.10.0+cpu
+torchvision==0.25.0+cpu

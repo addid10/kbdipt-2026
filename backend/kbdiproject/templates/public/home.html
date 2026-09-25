@@ -1,0 +1,76 @@
+{% extends 'public/base.html' %}
+{% block content %}
+{% include 'public/partials/header.html' %}
+
+{% if selected_site %}
+    {% with reading=selected_site.current_reading %}
+    {% if reading and reading.level != 'low' %}
+    <section class="warning-card {{ reading.level }}">
+        <div class="warning-icon">{% if reading.level == 'extreme' %}×{% elif reading.level == 'high' %}⚠{% else %}!{% endif %}</div>
+        <div class="warning-copy">
+            <span>PERINGATAN DINI</span>
+            <strong>{% if reading.level == 'extreme' %}Kondisi ekstrem terdeteksi{% elif reading.level == 'high' %}Risiko kebakaran meningkat{% else %}Kondisi perlu diperhatikan{% endif %}</strong>
+            <p>{{ selected_site.name }} berada pada status {{ reading.get_level_display }}.</p>
+            <small>Indeks KBDIpt: {{ reading.kbdi|floatformat:1 }}</small>
+            <a href="{% url 'public.site_detail' selected_site.code %}">Lihat Detail</a>
+        </div>
+        <button class="sound-button" type="button" data-alert-sound="{{ reading.level }}" aria-label="Uji suara peringatan">♪</button>
+    </section>
+    {% endif %}
+
+    <section class="site-title-block">
+        <span>Hutan / Lahan Dipantau</span>
+        <h1>{{ selected_site.name }}</h1>
+    </section>
+
+    <section class="index-card {% if reading %}{{ reading.level }}{% else %}neutral{% endif %}">
+        <div class="index-card-header">
+            <div><span>INDEKS KEKERINGAN</span><strong>⌖ {{ selected_site.name }}</strong></div>
+            <div class="update-time">{% if reading %}{{ reading.observed_at|date:"d M Y" }}<small>Update {{ reading.observed_at|timesince }} lalu</small>{% else %}Belum ada data{% endif %}</div>
+        </div>
+        <div class="index-card-body">
+            {% if reading %}
+                <strong class="index-value">{{ reading.kbdi|floatformat:1 }}</strong>
+                {% if selected_site.kbdi_delta != None %}<div class="trend {% if selected_site.kbdi_delta > 0 %}up{% elif selected_site.kbdi_delta < 0 %}down{% endif %}">{% if selected_site.kbdi_delta > 0 %}↑ Naik{% elif selected_site.kbdi_delta < 0 %}↓ Turun{% else %}→ Tetap{% endif %} dari {{ selected_site.previous_reading.kbdi|floatformat:1 }}</div>{% endif %}
+                <span class="large-status {{ reading.level }}">{% if reading.level == 'low' %}✓{% elif reading.level == 'moderate' %}!{% elif reading.level == 'high' %}⚠{% else %}×{% endif %} {{ reading.get_level_display }}</span>
+                <div class="monitoring-row"><span>🔥</span><span>Status Monitoring: <strong>{{ reading.get_level_display }}</strong></span><i></i></div>
+            {% else %}
+                <strong class="index-value muted-value">—</strong><p class="empty-copy">Belum ada pengukuran KBDIpt untuk lokasi ini.</p>
+            {% endif %}
+
+            <details class="site-details">
+                <summary>Lihat Detail</summary>
+                <div class="detail-grid">
+                    <div><span>Koordinat</span><strong>{% if selected_site.latitude and selected_site.longitude %}{{ selected_site.latitude }}, {{ selected_site.longitude }}{% else %}Belum diisi{% endif %}</strong></div>
+                    <div><span>Luas Area</span><strong>{% if selected_site.area_hectares %}{{ selected_site.area_hectares }} ha{% else %}—{% endif %}</strong></div>
+                    <div><span>Tipe Lahan</span><strong>{{ selected_site.land_type }}</strong></div>
+                    <div><span>Status Kawasan</span><strong class="protected-label">{{ selected_site.get_protection_status_display }}</strong></div>
+                    {% if selected_site.current_prediction %}<div class="full"><span>Vegetasi Terakhir</span><strong>{{ selected_site.current_prediction.get_vegetation_class_display }} · confidence {{ selected_site.current_prediction.confidence|floatformat:2 }}</strong></div>{% endif %}
+                    {% if reading and reading.water_table_depth_mm != None %}<div class="full"><span>Kedalaman Muka Air</span><strong>{{ reading.water_table_depth_mm|floatformat:0 }} mm di bawah permukaan</strong></div>{% endif %}
+                </div>
+            </details>
+        </div>
+    </section>
+    {% endwith %}
+
+    {% include 'public/partials/reference_grid.html' %}
+
+    {% if sites|length > 1 %}
+    <section class="other-sites">
+        <div class="section-heading"><h2>Lokasi Lain</h2><span>{{ sites|length }} lokasi aktif</span></div>
+        <div class="site-list">
+            {% for site in sites %}{% if site.id != selected_site.id %}
+            <a href="{% url 'public.site_detail' site.code %}" class="site-list-card">
+                <div><strong>{{ site.name }}</strong><small>{{ site.location }}</small></div>
+                {% if site.current_reading %}<div class="site-value"><strong>{{ site.current_reading.kbdi|floatformat:1 }}</strong><span class="status-badge {{ site.current_reading.level }}">{{ site.current_reading.get_level_display }}</span></div>{% else %}<span class="status-badge neutral">Belum ada data</span>{% endif %}
+            </a>
+            {% endif %}{% endfor %}
+        </div>
+    </section>
+    {% endif %}
+{% else %}
+    <section class="empty-state">
+        <div class="tree-logo large">K</div><h1>Belum ada lokasi pemantauan</h1><p>Belum ada lokasi aktif yang dapat ditampilkan. Silakan periksa kembali nanti.</p>
+    </section>
+{% endif %}
+{% endblock %}

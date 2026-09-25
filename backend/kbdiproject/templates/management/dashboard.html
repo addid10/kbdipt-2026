@@ -1,0 +1,45 @@
+{% extends 'management/base.html' %}
+{% block content %}
+<div class="metric-grid">
+    <article class="metric-card"><span>Lokasi Aktif</span><strong>{{ site_count }}</strong><small>Lokasi yang dimonitor</small></article>
+    <article class="metric-card danger"><span>Peringatan Aktif</span><strong>{{ active_alert_count }}</strong><small>High / Extreme</small></article>
+    <article class="metric-card"><span>Update Sistem</span><strong>{{ now|date:"H:i" }}</strong><small>{{ now|date:"d M Y" }} WITA</small></article>
+</div>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <div class="panel-heading"><div><span class="eyebrow">KBDIpt</span><h2>Pengukuran Terbaru</h2></div><a href="{% url 'kbdis.index' %}">Kelola</a></div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Lokasi</th><th>KBDIpt</th><th>Status</th><th>Waktu</th></tr></thead>
+                <tbody>
+                {% for item in latest_readings %}
+                    <tr><td>{{ item.site.name }}</td><td>{{ item.kbdi|floatformat:1 }}</td><td><span class="status-chip {{ item.level }}">{{ item.get_level_display }}</span></td><td>{{ item.observed_at|date:"d M H:i" }}</td></tr>
+                {% empty %}<tr><td colspan="4" class="empty">Belum ada pengukuran.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-heading"><div><span class="eyebrow">EWS</span><h2>Peringatan Aktif</h2></div><a href="{% url 'kbdis.alerts' %}">Lihat semua</a></div>
+        <div class="alert-list">
+            {% for alert in active_alerts %}
+                <article class="alert-row {{ alert.severity }}"><div><strong>{{ alert.site.name }}</strong><p>{{ alert.message }}</p></div><span>{{ alert.reading.kbdi|floatformat:1 }}</span></article>
+            {% empty %}<p class="empty">Tidak ada peringatan High/Extreme aktif.</p>{% endfor %}
+        </div>
+    </section>
+</div>
+
+<section class="panel">
+    <div class="panel-heading"><div><span class="eyebrow">AI</span><h2>Prediksi Vegetasi Terbaru</h2></div><a href="{% url 'cover.index' %}">Prediksi baru</a></div>
+    <div class="prediction-grid">
+        {% for prediction in latest_predictions %}
+            <article class="prediction-card">
+                <img src="{{ prediction.image.url }}" alt="Prediksi vegetasi {{ prediction.site.name }}">
+                <div><strong>{{ prediction.site.name }}</strong><span>{{ prediction.get_vegetation_class_display }} · {{ prediction.confidence|floatformat:2 }}</span><small>{{ prediction.predicted_at|date:"d M Y H:i" }}</small></div>
+            </article>
+        {% empty %}<p class="empty">Belum ada prediksi vegetasi.</p>{% endfor %}
+    </div>
+</section>
+{% endblock %}

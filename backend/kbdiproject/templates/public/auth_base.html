@@ -1,0 +1,18 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="KBDIpt - Sistem peringatan dini kebakaran lahan gambut">
+    <title>{{ title }}</title>
+    <link rel="icon" href="{% static 'icons/kbdipt.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'css/public.css' %}">
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

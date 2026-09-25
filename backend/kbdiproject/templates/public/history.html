@@ -1,0 +1,11 @@
+{% extends 'public/base.html' %}
+{% block content %}
+<header class="simple-page-header"><span>KBDIpt</span><h1>Riwayat</h1><p>Pengukuran kondisi kekeringan yang tersimpan di sistem.</p></header>
+<section class="content-card">
+    <form method="get" class="history-filter"><label>Lokasi<select name="site" onchange="this.form.submit()"><option value="">Semua lokasi</option>{% for site in sites %}<option value="{{ site.id }}" {% if selected_site_id == site.id|stringformat:'s' %}selected{% endif %}>{{ site.name }}</option>{% endfor %}</select></label></form>
+    <div class="reading-list">
+        {% for item in readings %}<a href="{% url 'public.site_detail' item.site.code %}" class="reading-item"><div><strong>{{ item.site.name }}</strong><small>{{ item.observed_at|date:"d M Y · H:i" }} WITA</small></div><div class="reading-score"><strong>{{ item.kbdi|floatformat:1 }}</strong><span class="status-badge {{ item.level }}">{{ item.get_level_display }}</span></div></a>
+        {% empty %}<p class="empty-copy">Belum ada data pengukuran.</p>{% endfor %}
+    </div>
+</section>
+{% endblock %}

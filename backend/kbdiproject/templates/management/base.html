@@ -1,0 +1,64 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#c85a18">
+    <title>{{ title }} | KBDIpt</title>
+    <link rel="stylesheet" href="{% static 'css/management.css' %}">
+</head>
+<body class="management-body">
+    <div class="management-shell">
+        <aside class="management-sidebar" id="management-sidebar">
+            <div class="brand-block">
+                <div class="brand-mark">K</div>
+                <div>
+                    <strong>KBDIpt</strong>
+                    <span>Operator Console</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav" aria-label="Navigasi admin">
+                <a href="{% url 'management.dashboard' %}" class="{% if navbar == 'dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="{% url 'cover.index' %}" class="{% if navbar == 'vegetation' %}active{% endif %}">Prediksi Vegetasi</a>
+                <a href="{% url 'kbdis.index' %}" class="{% if navbar == 'kbdi' %}active{% endif %}">KBDIpt</a>
+                <a href="{% url 'kbdis.alerts' %}" class="{% if navbar == 'alerts' %}active{% endif %}">Peringatan EWS</a>
+                <a href="/django-admin/">Django Admin</a>
+                <a href="{% url 'public.home' %}" target="_blank" rel="noopener">Tampilan User ↗</a>
+            </nav>
+            <div class="sidebar-user">
+                <div>
+                    <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                    <span>{{ request.user.username }}</span>
+                </div>
+                <form method="post" action="{% url 'management.logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="text-button">Keluar</button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="management-main">
+            <header class="management-topbar">
+                <button class="menu-toggle" type="button" data-sidebar-toggle aria-label="Buka menu">☰</button>
+                <div>
+                    <span class="eyebrow">KBDIpt Early Warning System</span>
+                    <h1>{{ title }}</h1>
+                </div>
+            </header>
+
+            <section class="management-content">
+                {% if messages %}
+                    <div class="message-stack">
+                        {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+                {% block content %}{% endblock %}
+            </section>
+        </main>
+    </div>
+    <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+    <script src="{% static 'js/management.js' %}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

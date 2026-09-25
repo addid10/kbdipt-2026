@@ -1,0 +1,11 @@
+{
+  "name": "KBDIpt Early Warning System",
+  "short_name": "KBDIpt",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#14873f",
+  "icons": [
+    {"src": "/static/icons/kbdipt.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

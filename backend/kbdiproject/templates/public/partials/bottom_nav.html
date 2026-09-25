@@ -1,0 +1,6 @@
+<nav class="bottom-nav" aria-label="Navigasi utama">
+    <a href="{% url 'public.home' %}" class="{% if nav == 'home' %}active{% endif %}"><span>⌂</span><small>Home</small></a>
+    <a href="{% url 'public.alerts' %}" class="{% if nav == 'alerts' %}active{% endif %}"><span>!</span><small>Peringatan</small></a>
+    <a href="{% url 'public.history' %}" class="{% if nav == 'history' %}active{% endif %}"><span>▥</span><small>Riwayat</small></a>
+    <a href="{% url 'user.profile' %}" class="{% if nav == 'profile' %}active{% endif %}"><span>●</span><small>Profil</small></a>
+</nav>

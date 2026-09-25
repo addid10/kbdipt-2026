@@ -1,0 +1,43 @@
+{% extends 'public/base.html' %}
+{% block content %}
+<header class="detail-header">
+    <a href="{% url 'public.home' %}" class="back-button">←</a>
+    <div><span>Detail Lokasi</span><h1>{{ site.name }}</h1><small>{{ site.location }}</small></div>
+</header>
+
+{% if reading %}
+<section class="detail-status-card {{ reading.level }}">
+    <div><span>Status Saat Ini</span><strong>{{ reading.get_level_display }}</strong><small>{{ reading.observed_at|date:"d M Y · H:i" }} WITA</small></div>
+    <div class="circle-index"><span>KBDIpt</span><strong>{{ reading.kbdi|floatformat:1 }}</strong></div>
+</section>
+
+<section class="content-card">
+    <div class="section-heading"><h2>Perkembangan Terbaru</h2><span>maks. 30 data</span></div>
+    <div class="bar-chart" aria-label="Grafik histori KBDIpt">
+        {% for item in readings reversed %}<div class="bar-wrap" title="{{ item.observed_at|date:'d M' }}: {{ item.kbdi|floatformat:1 }}"><i class="bar {{ item.level }}" style="--v:{{ item.kbdi }}"></i></div>{% endfor %}
+    </div>
+    {% if kbdi_delta != None %}<p class="chart-caption">Perubahan terakhir: <strong>{% if kbdi_delta > 0 %}+{% endif %}{{ kbdi_delta|floatformat:1 }}</strong> poin.</p>{% endif %}
+</section>
+
+<section class="content-card">
+    <h2>Informasi Kondisi</h2>
+    <div class="condition-grid">
+        <div><span>Curah hujan hari ini</span><strong>{{ reading.rainfall_today_mm|floatformat:1 }} mm</strong></div>
+        <div><span>Suhu maksimum</span><strong>{{ reading.max_temperature_c|floatformat:1 }} °C</strong></div>
+        <div><span>Tinggi muka air</span><strong>{% if reading.water_table_depth_mm != None %}{{ reading.water_table_depth_mm|floatformat:0 }} mm{% else %}—{% endif %}</strong></div>
+        <div><span>Vegetasi</span><strong>{% if prediction %}{{ prediction.get_vegetation_class_display }}{% else %}Belum diprediksi{% endif %}</strong></div>
+    </div>
+</section>
+
+<section class="content-card status-explanation {{ reading.level }}">
+    <h2>Tentang Status Ini</h2>
+    {% if reading.level == 'low' %}<p>Kondisi berada pada tingkat rendah. Sistem tetap melakukan pemantauan berkala.</p>
+    {% elif reading.level == 'moderate' %}<p>Kondisi kekeringan meningkat dan perlu dipantau. Alarm fisik belum diaktifkan pada tingkat ini.</p>
+    {% elif reading.level == 'high' %}<p>KBDIpt berada pada tingkat tinggi. API EWS menandai alarm aktif agar perangkat peringatan dapat merespons.</p>
+    {% else %}<p>KBDIpt berada pada tingkat ekstrem. API EWS menandai kondisi darurat dan alarm aktif pada tingkat tertinggi.</p>{% endif %}
+    <button class="inline-sound-button" data-alert-sound="{{ reading.level }}" type="button">♪ Uji Suara Status</button>
+</section>
+{% else %}<section class="empty-state compact"><h2>Belum ada pengukuran KBDIpt</h2></section>{% endif %}
+
+{% include 'public/partials/reference_grid.html' %}
+{% endblock %}

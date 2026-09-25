@@ -1,0 +1,64 @@
+{% extends 'management/base.html' %}
+{% block content %}
+<div class="two-column wide-left">
+    <section class="panel">
+        <div class="panel-heading"><div><span class="eyebrow">Perhitungan</span><h2>Input KBDIpt</h2></div></div>
+        <p class="muted">Threshold lahan gambut: Low ≤200, Moderat &gt;200–300, High &gt;300–350, Extreme &gt;350. Alarm aktif pada High dan Extreme.</p>
+        <p class="muted"><strong>KBDIpt sebelumnya diambil otomatis</strong> dari pengukuran terakhir pada lokasi yang sama. Nilai awal hanya diperlukan saat lokasi belum memiliki pengukuran sebelumnya.</p>
+        <form method="post" class="form-grid" id="kbdi-reading-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <label
+                    class="{% if field.name == 'site' or field.name == 'observed_at' %}full{% endif %}{% if field.name == 'initial_kbdi' %} full initial-kbdi-field{% endif %}"
+                    {% if field.name == 'initial_kbdi' %}data-initial-kbdi-field{% endif %}
+                >
+                    {{ field.label }} {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+                </label>
+            {% endfor %}
+            <div class="full"><button class="primary-button" type="submit">Hitung & Simpan</button></div>
+        </form>
+    </section>
+
+    <section class="panel warning-panel">
+        <div class="panel-heading"><div><span class="eyebrow">EWS</span><h2>Alarm Aktif</h2></div></div>
+        <div class="alert-list">
+            {% for alert in active_alerts %}<article class="alert-row {{ alert.severity }}"><div><strong>{{ alert.site.name }}</strong><p>{{ alert.get_severity_display }} · {{ alert.triggered_at|date:"d M H:i" }}</p></div><span>{{ alert.reading.kbdi|floatformat:1 }}</span></article>
+            {% empty %}<p class="empty">Tidak ada alarm aktif.</p>{% endfor %}
+        </div>
+    </section>
+</div>
+
+<section class="panel">
+    <div class="panel-heading"><div><span class="eyebrow">Histori</span><h2>Pengukuran KBDIpt</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Lokasi</th><th>Waktu</th><th>Previous</th><th>Hujan</th><th>Suhu Maks.</th><th>TMA</th><th>RF</th><th>DF</th><th>KBDIpt</th><th>Status</th></tr></thead><tbody>
+        {% for item in readings %}<tr><td>{{ item.site.name }}</td><td>{{ item.observed_at|date:"d M Y H:i" }}</td><td>{{ item.previous_kbdi|floatformat:1 }}</td><td>{{ item.rainfall_today_mm|floatformat:1 }} mm</td><td>{{ item.max_temperature_c|floatformat:1 }} °C</td><td>{% if item.water_table_depth_mm != None %}{{ item.water_table_depth_mm|floatformat:0 }} mm{% else %}—{% endif %}</td><td>{{ item.effective_rainfall_mm|floatformat:2 }}</td><td>{{ item.drought_factor|floatformat:2 }}</td><td><strong>{{ item.kbdi|floatformat:1 }}</strong></td><td><span class="status-chip {{ item.level }}">{{ item.get_level_display }}</span></td></tr>
+        {% empty %}<tr><td colspan="10" class="empty">Belum ada pengukuran.</td></tr>{% endfor %}
+    </tbody></table></div>
+</section>
+
+{{ sites_with_readings|json_script:"sites-with-readings" }}
+<script>
+(function () {
+    const siteSelect = document.getElementById('id_site');
+    const initialField = document.querySelector('[data-initial-kbdi-field]');
+    const initialInput = document.getElementById('id_initial_kbdi');
+    const dataNode = document.getElementById('sites-with-readings');
+    if (!siteSelect || !initialField || !initialInput || !dataNode) return;
+
+    const sitesWithReadings = new Set(JSON.parse(dataNode.textContent).map(String));
+
+    function syncInitialField() {
+        const selectedSite = String(siteSelect.value || '');
+        const needsInitial = Boolean(selectedSite) && !sitesWithReadings.has(selectedSite);
+        initialField.hidden = !needsInitial;
+        initialInput.required = needsInitial;
+        if (!needsInitial) initialInput.value = '';
+    }
+
+    siteSelect.addEventListener('change', syncInitialField);
+    syncInitialField();
+})();
+</script>
+{% endblock %}

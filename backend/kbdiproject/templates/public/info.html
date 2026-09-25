@@ -1,0 +1,19 @@
+{% extends 'public/base.html' %}
+{% block content %}
+<header class="simple-page-header"><span>KBDIpt</span><h1>Informasi</h1><p>Panduan membaca status sistem peringatan dini kebakaran lahan gambut.</p></header>
+<section class="content-card prose-card">
+    <h2>Apa itu KBDIpt?</h2>
+    <p>KBDIpt adalah modifikasi Keetch–Byram Drought Index untuk kondisi lahan gambut tropis. Sistem ini menyimpan data hujan dan suhu maksimum, menghitung indeks kekeringan, lalu menerjemahkannya menjadi empat tingkat status.</p>
+    <p>Pengukuran muka air tanah ditampilkan sebagai informasi monitoring. Pada implementasi rumus KBDIpt yang digunakan sistem, parameter <em>wc</em> tetap menggunakan kapasitas referensi 400 mm.</p>
+</section>
+{% include 'public/partials/reference_grid.html' %}
+<section class="content-card prose-card">
+    <h2>Kapan alarm aktif?</h2>
+    <p><strong>Low</strong> dan <strong>Moderat</strong> tetap ditampilkan sebagai informasi pemantauan. API EWS mengaktifkan flag alarm ketika status mencapai <strong>High</strong> atau <strong>Extreme</strong>.</p>
+    <div class="alarm-flow"><span>Low</span><span>Moderat</span><strong>High → Alarm</strong><strong>Extreme → Alarm Darurat</strong></div>
+</section>
+<section class="content-card prose-card">
+    <h2>Prediksi Vegetasi</h2>
+    <p>Citra vegetasi dianalisis menggunakan model ShuffleNetV2 dan disimpan sebagai Tinggi, Sedang, atau Terbuka/Bare beserta confidence. Informasi vegetasi ditampilkan sebagai konteks kondisi lahan dan tidak menggantikan parameter rumus KBDIpt.</p>
+</section>
+{% endblock %}
